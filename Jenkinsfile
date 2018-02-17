@@ -8,16 +8,6 @@ properties([disableConcurrentBuilds(),
         pipelineTriggers([githubPush()])
 ])
 
-
-def nodeLabel = null
-if (env.JOB_NAME.toLowerCase().contains("linux")) {
-    nodeLabel = "linux"
-} else if (env.JOB_NAME.toLowerCase().contains("freebsd")) {
-    nodeLabel = "freebsd"
-} else {
-    error("Invalid job name: ${env.JOB_NAME}")
-}
-
 def scmConfig(String url, String branch, String subdir) {
     return [ changelog: true, poll: true, branches: [[name: '*/' + branch]],
             scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
@@ -31,8 +21,7 @@ def scmConfig(String url, String branch, String subdir) {
     ]
 }
 
-node(nodeLabel) {
-
+def doBuild() {
     if (false) {
         stage("Print env") {
             env2 = env.getEnvironment()
@@ -60,8 +49,6 @@ node(nodeLabel) {
         }
     }
     env.LLVM_ARTIFACT = "cheri-${llvmBranch}-clang-llvm.tar.xz"
-    env.SDKROOT_DIR = "${env.WORKSPACE}/sdk"
-    env.label = nodeLabel
 
     stage("Build") {
         sh '''#!/usr/bin/env bash 
@@ -107,10 +94,10 @@ rm -f CMakeCache.txt
 cmake -G Ninja "${CMAKE_ARGS[@]}" ..
 
 # build
-echo ninja -v ${JFLAG}
+ninja -v ${JFLAG}
 
 # install
-echo ninja install
+ninja install
 '''
     }
     stage("Run tests (128)") {
@@ -124,8 +111,8 @@ rm -fv "${WORKSPACE}/llvm-test-output.xml"
 ninja check-all-cheri128 ${JFLAG} || echo "Some CHERI128 tests failed!"
 mv -fv "${WORKSPACE}/llvm-test-output.xml" "${WORKSPACE}/llvm-test-output-cheri128.xml"
 echo "Done running 128 tests"
-
 '''
+        junit healthScaleFactor: 2.0, testResults: 'llvm-test-output-cheri128.xml'
     }
     stage("Run tests (256)") {
         sh '''#!/usr/bin/env bash 
@@ -138,6 +125,7 @@ ninja check-all-cheri256 ${JFLAG} || echo "Some CHERI256 tests failed!"
 mv -fv "${WORKSPACE}/llvm-test-output.xml" "${WORKSPACE}/llvm-test-output-cheri256.xml"
 echo "Done running 256 tests"
 '''
+        junit healthScaleFactor: 2.0, testResults: 'llvm-test-output-cheri256.xml'
     }
     stage("Archive artifacts") {
         sh '''#!/usr/bin/env bash 
@@ -187,5 +175,27 @@ tar -cJf $LLVM_ARCHIVE `basename ${SDKROOT_DIR}`
 # rm -rf "${WORKSPACE}/llvm/Build"
 rm -rf "$SDKROOT_DIR"
 '''
+    }
+}
+
+
+def nodeLabel = null
+if (env.JOB_NAME.toLowerCase().contains("linux")) {
+    nodeLabel = "linux"
+} else if (env.JOB_NAME.toLowerCase().contains("freebsd")) {
+    nodeLabel = "freebsd"
+} else {
+    error("Invalid job name: ${env.JOB_NAME}")
+}
+
+node(nodeLabel) {
+    try {
+        env.label = nodeLabel
+        env.SDKROOT_DIR = "${env.WORKSPACE}/sdk"
+        doBuild()
+    } finally {
+        dir(env.SDKROOT_DIR) {
+            deleteDir()
+        }
     }
 }
