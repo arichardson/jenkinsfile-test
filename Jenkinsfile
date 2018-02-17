@@ -19,7 +19,7 @@ if (env.JOB_NAME.toLowerCase().contains("linux")) {
 }
 
 def scmConfig(String url, String branch, String subdir) {
-    return [ changelog: false, poll: false, branches: [[name: '*/' + branch]],
+    return [ changelog: true, poll: true, branches: [[name: '*/' + branch]],
             scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
                     extensions: [/* to skip polling: [$class: 'IgnoreNotifyCommit'], */
                             [$class: 'RelativeTargetDirectory', relativeTargetDir: subdir],
@@ -49,13 +49,15 @@ node(nodeLabel) {
     String lldBranch = llvmBranch == 'cap-table' ? 'master' : llvmBranch
     def gitCredentials = null
     stage("Checkout sources") {
-        echo("scm=${scm}")
-        llvmRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/llvm', llvmBranch, 'llvm'))
-        echo("LLVM = ${llvmRepo}")
-        clangRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/clang', clangBranch, 'llvm/tools/clang'))
-        echo("CLANG = ${clangRepo}")
-        lldRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/lld', lldBranch, 'llvm/tools/lld'))
-        echo("LLD = ${lldRepo}")
+        timestamps {
+            echo("scm=${scm}")
+            llvmRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/llvm', llvmBranch, 'llvm'))
+            echo("LLVM = ${llvmRepo}")
+            clangRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/clang', clangBranch, 'llvm/tools/clang'))
+            echo("CLANG = ${clangRepo}")
+            lldRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/lld', lldBranch, 'llvm/tools/lld'))
+            echo("LLD = ${lldRepo}")
+        }
     }
     env.LLVM_ARTIFACT = "cheri-${llvmBranch}-clang-llvm.tar.xz"
     env.SDKROOT_DIR = "${env.WORKSPACE}/sdk"
