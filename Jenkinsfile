@@ -144,7 +144,7 @@ ln -fs clang-cpp cheri-unknown-freebsd-cpp
 
 # clean & bundle up
 cd ${WORKSPACE}
-ls -la "${SDKROOT_DIR}/bin"
+ls -laS "${SDKROOT_DIR}/bin"
 tar -cJf cheri-${BRANCH_NAME}-clang-include.tar.xz -C ${SDKROOT_DIR} lib/clang
 # We can remove all the libraries because we link them statically (but they need to exist)
 truncate -s 0 ${SDKROOT_DIR}/lib/lib*
@@ -153,18 +153,18 @@ truncate -s 0 ${SDKROOT_DIR}/lib/lib*
          llvm-dsymutil llvm-dwp llvm-rc llvm-rtdyld clang-func-mapping clang-refactor clang-rename \\
          llvm-extract llvm-xray llvm-split llvm-cov llvm-symbolizer llvm-dwarfdump \\
          llvm-link llvm-stress llvm-cxxdump llvm-cvtres llvm-cat llvm-as llvm-pdbutil \\
-         llvm-diff llvm-modextract llvm-dis llvm-pdbdump llvm-profdata llvm-mt \\
+         llvm-diff llvm-modextract llvm-dis llvm-pdbdump llvm-profdata llvm-mt llvm-cfi-verify \\
          llvm-opt-report llvm-bcanalyzer llvm-mcmarkup llvm-lib llvm-ranlib \\
          verify-uselistorder sanstats clang-offload-bundler c-index-test \\
          clang-import-test bugpoint sancov obj2yaml yaml2obj)
 # Cmake files need tblgen
 truncate -s 0 ${SDKROOT_DIR}/bin/llvm-tblgen
-ls -la "${SDKROOT_DIR}/bin"
+ls -laS "${SDKROOT_DIR}/bin"
 # remove more useless stuff
 rm -rf ${SDKROOT_DIR}/share
 rm -rf ${SDKROOT_DIR}/include
 cd ${SDKROOT_DIR}/..
-tar -cJf "$LLVM_ARCHIVE" `basename ${SDKROOT_DIR}`
+# tar -cJf "$LLVM_ARCHIVE" `basename ${SDKROOT_DIR}`
 
 # clean up to save some disk space
 # rm -rf "${WORKSPACE}/llvm/Build"
