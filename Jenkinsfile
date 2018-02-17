@@ -21,6 +21,23 @@ def scmConfig(String url, String branch, String subdir) {
     ]
 }
 
+def runTests(int bits) {
+    stage("Run tests (${bits})") {
+        sh """#!/usr/bin/env bash 
+set -xe
+
+cd \${WORKSPACE}/llvm/Build
+# run tests
+rm -fv "\${WORKSPACE}/llvm-test-output.xml"
+echo ninja check-all-cheri${bits} || echo "Some CHERI128 tests failed!"
+touch \${WORKSPACE}/llvm-test-output.xml
+mv -fv "\${WORKSPACE}/llvm-test-output.xml" "\${WORKSPACE}/llvm-test-output-cheri${bits}.xml"
+echo "Done running CHERI${bits} tests
+"""
+        junit healthScaleFactor: 2.0, testResults: "llvm-test-output-cheri${bits}.xml"
+    }
+}
+
 def doBuild() {
     if (false) {
         stage("Print env") {
@@ -48,14 +65,14 @@ def doBuild() {
             echo("LLD = ${lldRepo}")
         }
     }
-    env.LLVM_ARTIFACT = "cheri-${llvmBranch}-clang-llvm.tar.xz"
+    env.LLVM_ARCHIVE = "cheri-${llvmBranch}-clang-llvm.tar.xz"
 
     stage("Build") {
         sh '''#!/usr/bin/env bash 
 set -xe
 
 #remove old artifact
-rm -fv "$LLVM_ARTIFACT"
+rm -fv "$LLVM_ARCHIVE"
 
 if [ -e "${SDKROOT_DIR}" ]; then
    echo "ERROR, old SDK was not deleted!" && exit 1
@@ -100,33 +117,9 @@ ninja -v ${JFLAG}
 ninja install
 '''
     }
-    stage("Run tests (128)") {
-        sh '''#!/usr/bin/env bash 
-set -xe
+    runTests(128)
+    runTests(256)
 
-pwd
-cd ${WORKSPACE}/llvm/Build
-# run tests
-rm -fv "${WORKSPACE}/llvm-test-output.xml"
-ninja check-all-cheri128 ${JFLAG} || echo "Some CHERI128 tests failed!"
-mv -fv "${WORKSPACE}/llvm-test-output.xml" "${WORKSPACE}/llvm-test-output-cheri128.xml"
-echo "Done running 128 tests"
-'''
-        junit healthScaleFactor: 2.0, testResults: 'llvm-test-output-cheri128.xml'
-    }
-    stage("Run tests (256)") {
-        sh '''#!/usr/bin/env bash 
-set -xe
-
-pwd
-cd ${WORKSPACE}/llvm/Build
-rm -fv "${WORKSPACE}/llvm-test-output.xml"
-ninja check-all-cheri256 ${JFLAG} || echo "Some CHERI256 tests failed!"
-mv -fv "${WORKSPACE}/llvm-test-output.xml" "${WORKSPACE}/llvm-test-output-cheri256.xml"
-echo "Done running 256 tests"
-'''
-        junit healthScaleFactor: 2.0, testResults: 'llvm-test-output-cheri256.xml'
-    }
     stage("Archive artifacts") {
         sh '''#!/usr/bin/env bash 
 set -xe
@@ -165,16 +158,18 @@ truncate -s 0 ${SDKROOT_DIR}/lib/lib*
          clang-import-test bugpoint sancov obj2yaml yaml2obj)
 # Cmake files need tblgen
 truncate -s 0 ${SDKROOT_DIR}/bin/llvm-tblgen
+ls -la  ${SDKROOT_DIR}/bin
 # remove more useless stuff
 rm -rf ${SDKROOT_DIR}/share
 rm -rf ${SDKROOT_DIR}/include
 cd ${SDKROOT_DIR}/..
-tar -cJf $LLVM_ARCHIVE `basename ${SDKROOT_DIR}`
+tar -cJf "$LLVM_ARCHIVE" `basename ${SDKROOT_DIR}`
 
 # clean up to save some disk space
 # rm -rf "${WORKSPACE}/llvm/Build"
 rm -rf "$SDKROOT_DIR"
 '''
+        archiveArtifacts artifacts: 'cheri-*-clang-*.tar.xz', onlyIfSuccessful: true
     }
 }
 
@@ -193,6 +188,9 @@ node(nodeLabel) {
         env.label = nodeLabel
         env.SDKROOT_DIR = "${env.WORKSPACE}/sdk"
         doBuild()
+        // Scan for compiler warnings
+        warnings canComputeNew: false, canResolveRelativePaths: true, consoleParsers: [[parserName: 'Clang (LLVM based)']]
+        step([$class: 'AnalysisPublisher', canComputeNew: false])
     } finally {
         dir(env.SDKROOT_DIR) {
             deleteDir()
