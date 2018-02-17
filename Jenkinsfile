@@ -144,21 +144,22 @@ ln -fs clang-cpp cheri-unknown-freebsd-cpp
 
 # clean & bundle up
 cd ${WORKSPACE}
+ls -la "${SDKROOT_DIR}/bin"
 tar -cJf cheri-$BRANCH-clang-include.tar.xz -C ${SDKROOT_DIR} lib/clang
 # We can remove all the libraries because we link them statically (but they need to exist)
 truncate -s 0 ${SDKROOT_DIR}/lib/lib*
 # remove the binaries that are not needed by downstream jobs (saves a lot of archiving and unpacking time)
 (cd ${SDKROOT_DIR}/bin && rm -vf clang-check opt llc lli llvm-lto2 llvm-lto llvm-c-test \\
-         llvm-dsymutil llvm-dwp llvm-nm llvm-ar llvm-rtdyld \\
+         llvm-dsymutil llvm-dwp llvm-rc llvm-rtdyld clang-func-mapping clang-refactor clang-rename \\
          llvm-extract llvm-xray llvm-split llvm-cov llvm-symbolizer llvm-dwarfdump \\
-         llvm-link llvm-stress llvm-cxxdump llvm-cvtres llvm-cat llvm-as \\
-         llvm-diff llvm-modextract llvm-dis llvm-pdbdump llvm-profdata \\
+         llvm-link llvm-stress llvm-cxxdump llvm-cvtres llvm-cat llvm-as llvm-pdbutil \\
+         llvm-diff llvm-modextract llvm-dis llvm-pdbdump llvm-profdata llvm-mt \\
          llvm-opt-report llvm-bcanalyzer llvm-mcmarkup llvm-lib llvm-ranlib \\
          verify-uselistorder sanstats clang-offload-bundler c-index-test \\
          clang-import-test bugpoint sancov obj2yaml yaml2obj)
 # Cmake files need tblgen
 truncate -s 0 ${SDKROOT_DIR}/bin/llvm-tblgen
-ls -la  ${SDKROOT_DIR}/bin
+ls -la "${SDKROOT_DIR}/bin"
 # remove more useless stuff
 rm -rf ${SDKROOT_DIR}/share
 rm -rf ${SDKROOT_DIR}/include
