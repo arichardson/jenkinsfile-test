@@ -4,12 +4,14 @@ def printVar(k, v) {
   echo("Value of ${k} = \n\t${valueStr}")
 }
 
+this.binding.variables.each {k,v -> printVar(k, v)}
+
+
 node {
   stage('checkout') {
     // def scmStr = scm.properties.collect{it}.join('\n')
     printVar("scm", scm)
     
-    this.binding.variables.each {k,v -> printVar(k, v)}
 
     def result = checkout scm
     echo("result = ${result}")
