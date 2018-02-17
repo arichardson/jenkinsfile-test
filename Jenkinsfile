@@ -29,8 +29,7 @@ set -xe
 cd \${WORKSPACE}/llvm/Build
 # run tests
 rm -fv "\${WORKSPACE}/llvm-test-output.xml"
-echo ninja check-all-cheri${bits} || echo "Some CHERI128 tests failed!"
-touch \${WORKSPACE}/llvm-test-output.xml
+ninja check-all-cheri${bits} ${JFLAG} || echo "Some CHERI128 tests failed!"
 mv -fv "\${WORKSPACE}/llvm-test-output.xml" "\${WORKSPACE}/llvm-test-output-cheri${bits}.xml"
 echo "Done running CHERI${bits} tests"
 """
@@ -105,7 +104,7 @@ CMAKE_ARGS+=("-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}" "-DCMAKE_C_COMPILER=${
 CMAKE_ARGS+=("-DCMAKE_BUILD_TYPE=Release" "-DLLVM_ENABLE_ASSERTIONS=ON")
 # Also don't set the default target or default sysroot when running tests as it breaks quite a few
 # max 1 hour total and max 2 minutes per test
-CMAKE_ARGS+=("-DLLVM_LIT_ARGS=--xunit-xml-output ${WORKSPACE}/llvm-test-output.xml --max-time 3600 --timeout 240")
+CMAKE_ARGS+=("-DLLVM_LIT_ARGS=--xunit-xml-output ${WORKSPACE}/llvm-test-output.xml --max-time 3600 --timeout 240 ${JFLAG}")
 
 rm -f CMakeCache.txt
 cmake -G Ninja "${CMAKE_ARGS[@]}" ..
@@ -164,7 +163,7 @@ ls -laS "${SDKROOT_DIR}/bin"
 rm -rf ${SDKROOT_DIR}/share
 rm -rf ${SDKROOT_DIR}/include
 cd ${SDKROOT_DIR}/..
-# tar -cJf "$LLVM_ARCHIVE" `basename ${SDKROOT_DIR}`
+tar -cJf "$LLVM_ARCHIVE" `basename ${SDKROOT_DIR}`
 
 # clean up to save some disk space
 # rm -rf "${WORKSPACE}/llvm/Build"
