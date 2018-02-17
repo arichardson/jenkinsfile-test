@@ -1,7 +1,7 @@
 
 def printVar(k, v) {
   def valueStr = v.properties.collect{it}.join('\n\t')
-  echo("Value of ${k} = \n\t${valueStr}
+  echo("Value of ${k} = \n\t${valueStr}")
 }
 
 node {
