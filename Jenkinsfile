@@ -26,10 +26,7 @@ def scmConfig(String url, String branch, String subdir) {
                             [$class: 'CloneOption', noTags: false, reference: '', shallow: true, timeout: 60]
                     ],
                     submoduleCfg: [],
-                    userRemoteConfigs: [
-                            [credentialsId: 'ctsrd-jenkins-api-token-with-username',
-                                    url: url]
-                    ]
+                    userRemoteConfigs: [[url: url, credentialsId: 'ctsrd-jenkins-api-token-with-username']]
             ]
     ]
 }
