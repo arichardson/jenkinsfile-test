@@ -32,7 +32,7 @@ rm -fv "\${WORKSPACE}/llvm-test-output.xml"
 echo ninja check-all-cheri${bits} || echo "Some CHERI128 tests failed!"
 touch \${WORKSPACE}/llvm-test-output.xml
 mv -fv "\${WORKSPACE}/llvm-test-output.xml" "\${WORKSPACE}/llvm-test-output-cheri${bits}.xml"
-echo "Done running CHERI${bits} tests
+echo "Done running CHERI${bits} tests"
 """
         junit healthScaleFactor: 2.0, testResults: "llvm-test-output-cheri${bits}.xml"
     }
