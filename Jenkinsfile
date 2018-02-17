@@ -64,14 +64,12 @@ def doBuild() {
             echo("LLD = ${lldRepo}")
         }
     }
-    env.LLVM_ARCHIVE = "cheri-${env.BRANCH_NAME}-clang-llvm.tar.xz"
-
     stage("Build") {
         sh '''#!/usr/bin/env bash 
 set -xe
 
-#remove old artifact
-rm -fv "$LLVM_ARCHIVE"
+#remove old artifacts
+rm -fv "cheri-*-clang-*.tar.xz"
 
 if [ -e "${SDKROOT_DIR}" ]; then
    echo "ERROR, old SDK was not deleted!" && exit 1
@@ -163,7 +161,7 @@ ls -laS "${SDKROOT_DIR}/bin"
 rm -rf ${SDKROOT_DIR}/share
 rm -rf ${SDKROOT_DIR}/include
 cd ${SDKROOT_DIR}/..
-tar -cJf "$LLVM_ARCHIVE" `basename ${SDKROOT_DIR}`
+tar -cJf "cheri-${BRANCH_NAME}-clang-llvm.tar.xz" `basename ${SDKROOT_DIR}`
 
 # clean up to save some disk space
 # rm -rf "${WORKSPACE}/llvm/Build"
