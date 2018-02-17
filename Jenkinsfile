@@ -65,7 +65,7 @@ def doBuild() {
             echo("LLD = ${lldRepo}")
         }
     }
-    env.LLVM_ARCHIVE = "cheri-${llvmBranch}-clang-llvm.tar.xz"
+    env.LLVM_ARCHIVE = "cheri-${env.BRANCH_NAME}-clang-llvm.tar.xz"
 
     stage("Build") {
         sh '''#!/usr/bin/env bash 
@@ -145,7 +145,7 @@ ln -fs clang-cpp cheri-unknown-freebsd-cpp
 # clean & bundle up
 cd ${WORKSPACE}
 ls -la "${SDKROOT_DIR}/bin"
-tar -cJf cheri-$BRANCH-clang-include.tar.xz -C ${SDKROOT_DIR} lib/clang
+tar -cJf cheri-${BRANCH_NAME}-clang-include.tar.xz -C ${SDKROOT_DIR} lib/clang
 # We can remove all the libraries because we link them statically (but they need to exist)
 truncate -s 0 ${SDKROOT_DIR}/lib/lib*
 # remove the binaries that are not needed by downstream jobs (saves a lot of archiving and unpacking time)
