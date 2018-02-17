@@ -4,7 +4,7 @@ def printVar(k, v) {
   echo("Value of ${k} = \n\t${valueStr}")
 }
 
-this.binding.variables.each {k,v -> printVar(k, v)}
+this.variables.each {k,v -> printVar(k, v)}
 
 
 node {
