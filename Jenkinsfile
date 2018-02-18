@@ -24,7 +24,7 @@ set -xe
 pwd
 git branch
 git status
-git show HEAD
+git log -1
 '''
     }
     return result
