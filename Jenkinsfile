@@ -31,9 +31,6 @@ pwd
 git branch
 git status
 git log -3
-git checkout refs/remotes/origin/${branch}
-git status
-git log -3
 """
     }
     return result
