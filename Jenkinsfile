@@ -9,7 +9,7 @@ properties([disableConcurrentBuilds(),
 ])
 
 def doGit(String url, String branch, String subdir) {
-    def result = checkout([ changelog: true, poll: true, branches: [[name: branch]],
+    def options = [ changelog: true, poll: true, branches: [[name: branch]],
             scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
                     extensions: [/* to skip polling: [$class: 'IgnoreNotifyCommit'], */
                             [$class: 'RelativeTargetDirectory', relativeTargetDir: subdir],
@@ -17,7 +17,9 @@ def doGit(String url, String branch, String subdir) {
                     ],
                     userRemoteConfigs: [[url: url, credentialsId: 'ctsrd-jenkins-api-token-with-username']]
             ]
-    ])
+    ]
+    echo("Git options: ${options}")
+    def result = checkout(options)
     dir(subdir) {
         sh '''
 set -xe
