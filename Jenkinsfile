@@ -8,17 +8,26 @@ properties([disableConcurrentBuilds(),
         pipelineTriggers([githubPush()])
 ])
 
-def scmConfig(String url, String branch, String subdir) {
-    return [ changelog: true, poll: true, branches: [[name: '*/' + branch]],
+def doGit(String url, String branch, String subdir) {
+    def result = checkout([ changelog: true, poll: true, branches: [[name: branch]],
             scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
                     extensions: [/* to skip polling: [$class: 'IgnoreNotifyCommit'], */
                             [$class: 'RelativeTargetDirectory', relativeTargetDir: subdir],
                             [$class: 'CloneOption', noTags: false, reference: '', shallow: true, timeout: 60]
                     ],
-                    submoduleCfg: [],
                     userRemoteConfigs: [[url: url, credentialsId: 'ctsrd-jenkins-api-token-with-username']]
             ]
-    ]
+    ])
+    dir(subdir) {
+        sh '''
+set -xe
+pwd
+git branch
+git status
+git show HEAD
+'''
+    }
+    return result
 }
 
 def runTests(int bits) {
@@ -56,14 +65,15 @@ def doBuild() {
     stage("Checkout sources") {
         timestamps {
             echo("scm=${scm}")
-            llvmRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/llvm', llvmBranch, 'llvm'))
+            llvmRepo = doGit('https://github.com/CTSRD-CHERI/llvm', llvmBranch, 'llvm')
             echo("LLVM = ${llvmRepo}")
-            clangRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/clang', clangBranch, 'llvm/tools/clang'))
+            clangRepo = doGit('https://github.com/CTSRD-CHERI/clang', clangBranch, 'llvm/tools/clang')
             echo("CLANG = ${clangRepo}")
-            lldRepo = checkout(scmConfig('https://github.com/CTSRD-CHERI/lld', lldBranch, 'llvm/tools/lld'))
+            lldRepo = doGit('https://github.com/CTSRD-CHERI/lld', lldBranch, 'llvm/tools/lld')
             echo("LLD = ${lldRepo}")
         }
     }
+    error("STOP now")
     stage("Build") {
         sh '''#!/usr/bin/env bash 
 set -xe
