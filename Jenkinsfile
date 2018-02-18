@@ -9,11 +9,13 @@ properties([disableConcurrentBuilds(),
 ])
 
 def doGit(String url, String branch, String subdir) {
-    def options = [ changelog: true, poll: true, branches: [[name: branch]],
+        def options = [ changelog: true, poll: true, branches: [[name: "refs/heads/${branch}"]],
             scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
                     extensions: [/* to skip polling: [$class: 'IgnoreNotifyCommit'], */
                             [$class: 'RelativeTargetDirectory', relativeTargetDir: subdir],
-                            [$class: 'CloneOption', noTags: false, reference: '', shallow: true, timeout: 60]
+                            [$class: 'CloneOption', noTags: false, reference: '', shallow: true, depth: 10, timeout: 60],
+                            /* Clean clone: */ [$class: 'WipeWorkspace'],
+                            [$class: 'LocalBranch', localBranch: branch]
                     ],
                     userRemoteConfigs: [[url: url, credentialsId: 'ctsrd-jenkins-api-token-with-username']]
             ]
