@@ -28,7 +28,7 @@ set -xe
 pwd
 git branch
 git status
-git log -1
+git log -3
 '''
     }
     return result
