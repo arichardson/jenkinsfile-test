@@ -29,7 +29,7 @@ set -xe
 cd \${WORKSPACE}/llvm/Build
 # run tests
 rm -fv "\${WORKSPACE}/llvm-test-output.xml"
-ninja check-all-cheri${bits} ${JFLAG} || echo "Some CHERI128 tests failed!"
+ninja check-all-cheri${bits} \${JFLAG} || echo "Some CHERI${bits} tests failed!"
 mv -fv "\${WORKSPACE}/llvm-test-output.xml" "\${WORKSPACE}/llvm-test-output-cheri${bits}.xml"
 echo "Done running CHERI${bits} tests"
 """
