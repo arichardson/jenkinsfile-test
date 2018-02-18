@@ -9,8 +9,10 @@ properties([disableConcurrentBuilds(),
 ])
 
 def doGit(String url, String branch, String subdir) {
-        def options = [ changelog: true, poll: true, branches: [[name: "refs/remotes/origin/${branch}"]],
-            scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
+        def options = [ changelog: true, poll: true,
+            scm: [$class: 'GitSCM',
+                    doGenerateSubmoduleConfigurations: false,
+                    branches: [[name: "refs/heads/${branch}"]],
                     extensions: [/* to skip polling: [$class: 'IgnoreNotifyCommit'], */
                             [$class: 'RelativeTargetDirectory', relativeTargetDir: subdir],
                             [$class: 'CloneOption', noTags: false, reference: '', shallow: true, depth: 10, timeout: 60],
