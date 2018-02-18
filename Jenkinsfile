@@ -9,13 +9,13 @@ properties([disableConcurrentBuilds(),
 ])
 
 def doGit(String url, String branch, String subdir) {
-        def options = [ changelog: true, poll: true, branches: [[name: "refs/heads/${branch}"]],
+        def options = [ changelog: true, poll: true, branches: [[name: "refs/remotes/origin/${branch}"]],
             scm: [$class: 'GitSCM', doGenerateSubmoduleConfigurations: false,
                     extensions: [/* to skip polling: [$class: 'IgnoreNotifyCommit'], */
                             [$class: 'RelativeTargetDirectory', relativeTargetDir: subdir],
                             [$class: 'CloneOption', noTags: false, reference: '', shallow: true, depth: 10, timeout: 60],
                             /* Clean clone: */ [$class: 'WipeWorkspace'],
-                            [$class: 'LocalBranch', localBranch: branch]
+                            // [$class: 'LocalBranch', localBranch: branch]
                     ],
                     userRemoteConfigs: [[url: url, credentialsId: 'ctsrd-jenkins-api-token-with-username']]
             ]
@@ -23,13 +23,16 @@ def doGit(String url, String branch, String subdir) {
     echo("Git options: ${options}")
     def result = checkout(options)
     dir(subdir) {
-        sh '''
+        sh """
 set -xe
 pwd
 git branch
 git status
 git log -3
-'''
+git checkout refs/remotes/origin/${branch}
+git status
+git log -3
+"""
     }
     return result
 }
