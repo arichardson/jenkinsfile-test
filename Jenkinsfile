@@ -36,5 +36,8 @@ node('linux') {
         setGitHubStatus(scmInfo, [context: "jenkins/error", result: 'ERROR'])
         setGitHubStatus(scmInfo, [context: "jenkins/failure", result: 'FAILURE'])
         setGitHubStatus(scmInfo, [context: "jenkins/current", result: null])
+        // finally set the default status
+        currentBuild.result = currentBuild.currentResult
+        setGitHubStatus(scmInfo)
     }
 }
