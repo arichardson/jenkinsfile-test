@@ -8,8 +8,11 @@ properties([disableConcurrentBuilds(),
         pipelineTriggers([githubPush()])
 ])
 
+
+
+def scmInfo = null
+
 def doBuild() {
-    def scmInfo = null
     stage("Do build") {
         scmInfo = checkout scm
         setGitHubStatus(scmInfo)
