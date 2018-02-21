@@ -35,7 +35,7 @@ node('linux') {
         if (!scmInfo)
             error("FAILED!")
         setGitHubStatus(scmInfo, [context: "jenkins/pending", message: 'this is still pending..', result: 'PENDING'])
-        setGitHubStatus(scmInfo, [context: "jenkins/success", message: 'Done!' result: 'SUCCESS'])
+        setGitHubStatus(scmInfo, [context: "jenkins/success", message: 'Done!', result: 'SUCCESS'])
         setGitHubStatus(scmInfo, [context: "jenkins/error", message: 'Failed for some reason', result: 'ERROR'])
         setGitHubStatus(scmInfo, [context: "jenkins/failure", message: '15 unit tests failed', result: 'FAILURE'])
         setGitHubStatus(scmInfo, [context: "jenkins/current", message: 'default result'])
