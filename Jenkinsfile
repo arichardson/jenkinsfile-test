@@ -15,8 +15,8 @@ scmInfo = null
 def doBuild() {
     stage("Do build") {
         scmInfo = checkout scm
-        setGitHubStatus(scmInfo)
-        sleep(10)
+        setGitHubStatus(scmInfo, [message: 'Build pending...'])
+        sleep(60)
     }
 }
 
@@ -34,13 +34,13 @@ node('linux') {
         echo("SCM INFO: ${scmInfo}")
         if (!scmInfo)
             error("FAILED!")
-        setGitHubStatus(scmInfo, [context: "jenkins/pending", result: 'PENDING'])
-        setGitHubStatus(scmInfo, [context: "jenkins/success", result: 'SUCCESS'])
-        setGitHubStatus(scmInfo, [context: "jenkins/error", result: 'ERROR'])
-        setGitHubStatus(scmInfo, [context: "jenkins/failure", result: 'FAILURE'])
-        setGitHubStatus(scmInfo, [context: "jenkins/current", result: null])
+        setGitHubStatus(scmInfo, [context: "jenkins/pending", message: 'this is still pending..', result: 'PENDING'])
+        setGitHubStatus(scmInfo, [context: "jenkins/success", message: 'Done!' result: 'SUCCESS'])
+        setGitHubStatus(scmInfo, [context: "jenkins/error", message: 'Failed for some reason', result: 'ERROR'])
+        setGitHubStatus(scmInfo, [context: "jenkins/failure", message: '15 unit tests failed', result: 'FAILURE'])
+        setGitHubStatus(scmInfo, [context: "jenkins/current", message: 'default result'])
         // finally set the default status
         currentBuild.result = currentBuild.currentResult
-        setGitHubStatus(scmInfo)
+        setGitHubStatus(scmInfo, [message: 'Build completed'])
     }
 }
