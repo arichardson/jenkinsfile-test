@@ -31,6 +31,9 @@ node('linux') {
         dir(env.SDKROOT_DIR) {
             deleteDir()
         }
+        echo("SCM INFO: ${scmInfo}")
+        if (!scmInfo)
+            error("FAILED!")
         setGitHubStatus(scmInfo, [context: "jenkins/pending", result: 'PENDING'])
         setGitHubStatus(scmInfo, [context: "jenkins/success", result: 'SUCCESS'])
         setGitHubStatus(scmInfo, [context: "jenkins/error", result: 'ERROR'])
