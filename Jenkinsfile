@@ -10,7 +10,7 @@ properties([disableConcurrentBuilds(),
 
 
 
-def scmInfo = null
+scmInfo = null
 
 def doBuild() {
     stage("Do build") {
